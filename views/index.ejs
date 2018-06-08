@@ -4,40 +4,425 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
-    <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.dev.js"></script>
-    <script>
-    $(document).ready(function(){
-
-        var socket = io();
-
-        socket.on('confirm', function(){
-            console.log('Connection confirmed');
-        });
-
-        $('#startGame').on('click', function(){
-            console.log('emitting startGame');
-            socket.emit('startGame');
-        });
-
-        $('#rollDice').on('click', function(){
-            console.log('emitting rollDice');
-            socket.emit('rollDice');
-        });
-
-        $('#rerollDice').on('click', function(){
-            console.log('emitting rerollDice');
-            socket.emit('rerollDice');
-        });
-
-    });
-    </script>
+    <title>Document</title>
+    <style>
+    .highlight{ background-color: lightsteelblue; }
+    </style>
 </head>
 <body>
-    <button id="startGame">startGame event</button>
-    <button id="rollDice">rollDice event</button>
-    <button id="rerollDice">rerollDice event</button>
+    <script>
+    $(document).ready(function(){
+        var socket = io();
+        var diceRolled = false;
+
+        $('#start').click(function(){
+            socket.emit('startGame');
+            console.log("start me");
+         });
+
+         $('#end').click(function(){
+            socket.on('endGame', function() {
+                console.log("end me");
+                socket.emit('endGame');
+            });
+         });
+
+         $('#roll').on('click', sendRoll);
+
+         function sendRoll(){
+             $('#roll').off('click').on('click', sendReroll);
+            socket.emit('rollDice');
+             diceRolled = true;
+             console.log('rolling dice');
+         };
+
+         function sendReroll(){
+             $('#roll').off('click').on('click', sendRoll);
+            socket.emit('rerollDice');
+            diceRolled = false;
+            // unhighlight dice
+            console.log('rerolling dice');
+         };
+
+         socket.on('diceRolled', function(data){
+            console.log('heard diceRolled');
+            for(let i in data.dice){
+                let selectorString = '#d'+i;
+                $(selectorString).attr('src',data.dice[i].path);
+            }
+         });
+
+         $('#reroll').on('click', function(){
+             $('#reroll').attr('id', 'roll');
+             socket.emit('rerollDice');
+             diceRolled = false;
+             // unhighlight dice
+             console.log('rerolling dice');
+         });
+
+        $('#start, #end').click(function(){
+            $('#start').toggleClass('d-none');
+            $('#end').toggleClass('d-none')
+        });
+
+        $('#d0').on('click', function(){
+            if(diceRolled){
+                console.log('keeping die 0');
+                $('#d0').toggleClass('highlight');
+                socket.emit('keepDie', {die : 0});
+            }
+        });
+
+        $('#d1').on('click', function(){
+            if(diceRolled){
+                console.log('keeping die 1');
+                $('#d1').toggleClass('highlight');
+                socket.emit('keepDie', {die : 1});
+            }
+        });
     
+        $('#d2').on('click', function(){
+            if(diceRolled){
+                console.log('keeping die 2');
+                $('#d2').toggleClass('highlight');
+                socket.emit('keepDie', {die : 2});
+            }
+        });       
+        
+        $('#d3').on('click', function(){
+            if(diceRolled){
+                console.log('keeping die 3');
+                $('#d3').toggleClass('highlight');
+                socket.emit('keepDie', {die : 3});
+            }
+        });
+
+        $('#d4').on('click', function(){
+            if(diceRolled){
+                console.log('keeping die 4');
+                $('#d4').toggleClass('highlight');
+                socket.emit('keepDie', {die : 4});
+            }
+        });
+    
+    
+    
+    
+    
+    
+    });
+    </script>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12 p-3">
+                <h1 class='d-inline-block text-info display-5'>Yahtzee <span class='small text-danger'>with friends</span></h1>
+                <button id='start' class='btn btn-outline-success float-right'>START GAME</button>
+                <button id='end' class='btn btn-outline-danger float-right d-none' >END GAME</button>
+            </div>
+        </div>
+        <div class="row">
+            <!-- other players score cards -->
+            <!-- player 2 -->
+            <div class="col-4">
+                <div class="row small p-1">
+                    <div class="col-12">
+                    <div class='border p-3 w-50'>
+                        <p>Player 2</p>
+                        <table class = 'table-hover table-bordered text-center' >
+                                <thead>
+                                    <tr>
+                                        <th>POSSIBLE ROLLS</th>
+                                        <th class = 'text-sm'>HOW TO SCORE</th>
+                                        <th>GAME </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Aces = 1</td>
+                                        <td class='small'><small>Count and Add All Dice</small></td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Twos = 2</td>
+                                        <td class='small'><small>Count and Add All Dice</small></td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Threes = 3</td>
+                                        <td class='small'><small>Count and Add All Dice</small></td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Fours = 4</td>
+                                        <td class='small'><small>Count and Add All Dice</small></td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Fives = 5</td>
+                                        <td class='small'><small>Count and Add All Dice</small></td>
+                                        <td></td>
+                                    </tr> 
+                                    <tr>
+                                        <td>Sixes = 6</td>
+                                        <td class='small'><small>Count and Add All Dice</small></td>
+                                        <td></td>
+                                    </tr> 
+                                    <tr>
+                                        <td>3 of a Kind</td>
+                                        <td class='small'><small>Count and Add All Dice</small></td>
+                                        <td></td>
+                                    </tr> 
+                                    <tr>
+                                        <td>4 of a Kind</td>
+                                        <td class='small'><small>Count and Add All Dice</small></td>
+                                        <td></td>
+                                    </tr>   
+                                    <tr>
+                                        <td>YAHTZEE</td>
+                                        <td>SCORE 50</td>
+                                        <td>50</td>
+                                    </tr>
+                                    <tr>
+                                        <td>GRAND TOTAL</td>
+                                        <td>-></td>
+                                        <td></td>
+                                    </tr>         
+                                </tbody>
+                            </table>
+                        </div>
+                        </div>
+                </div>
+                <!-- player 3 -->
+                <div class="row small p-1">
+                    <div class="col-12">
+                    <div class='border p-3 w-50'>
+                        <p>Player 3</p>
+                        <table class = 'table-hover table-bordered text-center'>
+                                <thead>
+                                    <tr>
+                                        <th>POSSIBLE ROLLS</th>
+                                        <th class = 'text-sm'>HOW TO SCORE</th>
+                                        <th>GAME </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Aces = 1</td>
+                                        <td class='small'><small>Count and Add All Dice</small></td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Twos = 2</td>
+                                        <td class='small'><small>Count and Add All Dice</small></td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Threes = 3</td>
+                                        <td class='small'><small>Count and Add All Dice</small></td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Fours = 4</td>
+                                        <td class='small'><small>Count and Add All Dice</small></td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Fives = 5</td>
+                                        <td class='small'><small>Count and Add All Dice</small></td>
+                                        <td></td>
+                                    </tr> 
+                                    <tr>
+                                        <td>Sixes = 6</td>
+                                        <td class='small'><small>Count and Add All Dice</small></td>
+                                        <td></td>
+                                    </tr> 
+                                    <tr>
+                                        <td>3 of a Kind</td>
+                                        <td class='small'><small>Count and Add All Dice</small></td>
+                                        <td></td>
+                                    </tr> 
+                                    <tr>
+                                        <td>4 of a Kind</td>
+                                        <td class='small'><small>Count and Add All Dice</small></td>
+                                        <td></td>
+                                    </tr>   
+                                    <tr>
+                                        <td>YAHTZEE</td>
+                                        <td>SCORE 50</td>
+                                        <td>50</td>
+                                    </tr>
+                                    <tr>
+                                        <td>GRAND TOTAL</td>
+                                        <td>-></td>
+                                        <td></td>
+                                    </tr>         
+                                </tbody>
+                            </table>
+                        </div>
+                        </div>
+                </div>
+                <!-- player 4 -->
+                <div class="row small p-1">
+                        <div class="col-12">
+                        <div class='border p-3 w-50'>
+                            <p>Player 4</p>
+                            <table class = 'table-hover table-bordered text-center'>
+                                    <thead>
+                                        <tr>
+                                            <th>POSSIBLE ROLLS</th>
+                                            <th class = 'text-sm'>HOW TO SCORE</th>
+                                            <th>GAME </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Aces = 1</td>
+                                            <td class='small'><small>Count and Add All Dice</small></td>
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Twos = 2</td>
+                                            <td class='small'><small>Count and Add All Dice</small></td>
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Threes = 3</td>
+                                            <td class='small'><small>Count and Add All Dice</small></td>
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Fours = 4</td>
+                                            <td class='small'><small>Count and Add All Dice</small></td>
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Fives = 5</td>
+                                            <td class='small'><small>Count and Add All Dice</small></td>
+                                            <td></td>
+                                        </tr> 
+                                        <tr>
+                                            <td>Sixes = 6</td>
+                                            <td class='small'><small>Count and Add All Dice</small></td>
+                                            <td></td>
+                                        </tr> 
+                                        <tr>
+                                            <td>3 of a Kind</td>
+                                            <td class='small'><small>Count and Add All Dice</small></td>
+                                            <td></td>
+                                        </tr> 
+                                        <tr>
+                                            <td>4 of a Kind</td>
+                                            <td class='small'><small>Count and Add All Dice</small></td>
+                                            <td></td>
+                                        </tr>   
+                                        <tr>
+                                            <td>YAHTZEE</td>
+                                            <td>SCORE 50</td>
+                                            <td>50</td>
+                                        </tr>
+                                        <tr>
+                                            <td>GRAND TOTAL</td>
+                                            <td>-></td>
+                                            <td></td>
+                                        </tr>         
+                                    </tbody>
+                                </table>
+                            </div>
+                            </div>
+                    </div>
+            </div>
+            <div class="col-8" style='margin-left: -100px'>
+                <div class="row">
+                    <!-- dice and roll -->
+                    <div class="col-12 p-5">
+                        <div class="row">
+                            <div class="col-2"></div>
+                            <div class="col-8 border p-3">
+                                <p>Roll:</p>
+                                <div class="col-12 border mb-3 p-2 rounded">
+                                    <div class='d-flex justify-content-around' style='height: 50px'>
+                                        <img class = '' style = 'width : 50px' src="/1.png" alt="" id="d0">
+                                        <img class = '' style = 'width : 50px' src="/2.png" alt="" id="d1">
+                                        <img class = '' style = 'width : 50px' src="/3.png" alt="" id="d2">
+                                        <img class = '' style = 'width : 50px' src="/4.png" alt="" id="d3">
+                                        <img class = '' style = 'width : 50px' src="/5.png" alt="" id="d4">
+                                    </div>
+                                </div>
+                                <button id="roll" class='btn btn-outline-primary float-right'>ROLL</button>
+                            </div>
+                            <div class="col-2"></div>
+                        </div>
+                    </div>
+                </div>
+                <table class = 'table table-hover table-bordered'>
+                    <thead>
+                        <tr>
+                            <th>POSSIBLE ROLLS</th>
+                            <th class = 'text-sm'>HOW TO SCORE</th>
+                            <th>GAME </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Aces = 1</td>
+                            <td class='small'><small>Count and Add All Dice</small></td>
+                            <td></td>
+            
+                        </tr>
+                        <tr>
+                            <td>Twos = 2</td>
+                            <td class='small'><small>Count and Add All Dice</small></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>Threes = 3</td>
+                            <td class='small'><small>Count and Add All Dice</small></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>Fours = 4</td>
+                            <td class='small'><small>Count and Add All Dice</small></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>Fives = 5</td>
+                            <td class='small'><small>Count and Add All Dice</small></td>
+                            <td></td>
+                        </tr> 
+                        <tr>
+                            <td>Sixes = 6</td>
+                            <td class='small'><small>Count and Add All Dice</small></td>
+                            <td></td>
+                        </tr> 
+                        <tr>
+                            <td>3 of a Kind</td>
+                            <td class='small'><small>Count and Add All Dice</small></td>
+                            <td></td>
+                        </tr> 
+                        <tr>
+                            <td>4 of a Kind</td>
+                            <td class='small'><small>Count and Add All Dice</small></td>
+                            <td></td>
+                        </tr>   
+                        <tr>
+                            <td>YAHTZEE</td>
+                            <td>SCORE 50</td>
+                            <td>50</td>
+                        </tr>
+                        <tr>
+                            <td>GRAND TOTAL</td>
+                            <td>-></td>
+                            <td></td>
+                        </tr>         
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+    </div>
 </body>
 </html>
+    

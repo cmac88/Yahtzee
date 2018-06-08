@@ -116,10 +116,9 @@ io.on('connection', function(socket){
     });
 
     socket.on('rerollDice', function(data){
-        // activePlayer.dice[3].keep = true;
-        // activePlayer.dice[4].keep = true;
+        console.log('heard rerollDice');
         activePlayer.rerollDice(activePlayer.dice);
-        // respond
+        socket.emit('diceRolled', {dice : activePlayer.dice});
         console.log(activePlayer.dice);
         console.log('server state 3');
     });
@@ -132,6 +131,12 @@ io.on('connection', function(socket){
         io.emit('startOfTurn', {player : playerTurn, msg : "It is Player "+playerTurn+"'s turn"});
     });
 
+    socket.on('keepDie', function(data){
+        // {die: index}
+        console.log('heard keepDie '+data);
+        activePlayer.dice[data.die].keep = !activePlayer.dice[data.die].keep;
+        console.log(activePlayer.dice);
+    });
 
 
 

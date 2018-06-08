@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.dev.js"></script>
+    <script>
+    $(document).ready(function(){
+
+        var socket = io();
+
+        socket.on('confirm', function(){
+            console.log('Connection confirmed');
+        });
+
+        $('#startGame').on('click', function(){
+            console.log('emitting startGame');
+            socket.emit('startGame');
+        });
+
+        $('#rollDice').on('click', function(){
+            console.log('emitting rollDice');
+            socket.emit('rollDice');
+        });
+
+        $('#rerollDice').on('click', function(){
+            console.log('emitting rerollDice');
+            socket.emit('rerollDice');
+        });
+
+    });
+    </script>
+</head>
+<body>
+    <button id="startGame">startGame event</button>
+    <button id="rollDice">rollDice event</button>
+    <button id="rerollDice">rerollDice event</button>
+    
+</body>
+</html>
